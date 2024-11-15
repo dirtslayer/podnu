@@ -16,7 +16,7 @@ def "url parse filename" [] {  # -> string
 
 
 def "bing url parse filename" [] {  # -> string
-    url parse | get params.id
+    url parse | get params | where key == 'id' | get value.0
 }
 
 # download any images that have been added to national geo photo of the day into the current directory
