@@ -47,9 +47,18 @@ export def main [] {
         | append $bing_pod
     )
 
-    let already_downloaded_images = (
-    	try { cd img; ls *.jpg | get name } catch { [] }
+    let skip_images = ( open skip.ssv | get filename )
+
+    print $skip_images
+
+    let already_downloaded_images =  (
+        (
+            try { cd img; ls *.jpg | get name } catch { [] }
+        )
+        | append $skip_images
     )
+
+    print $already_downloaded_images
 
     let photos_to_download = (
         $all_pod | where {|it|
