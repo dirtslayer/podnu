@@ -23,8 +23,7 @@ def "bing url parse filename" [] {  # -> string
 export def main [] {
     let national_geo_pod = (
         http get https://www.nationalgeographic.com/photo-of-the-day/
-        | rg --only-matching '"https.*?"'
-        | rg --only-matching 'http.*?jpg'
+        | rg --only-matching 'https://[^"]+?\.jpg'
         | rg --invert-match '16x9|3x2|2x3|3x4|4x3|_square|2x1'
         | lines
         | uniq
@@ -32,6 +31,9 @@ export def main [] {
         | wrap url
         | upsert filename {|it| $it.url | url parse filename}
     )
+
+    print $national_geo_pod
+    
 
     let bing_pod = (
         [ $"http://bing.com(
@@ -58,7 +60,7 @@ export def main [] {
         | append $skip_images
     )
 
-    print $already_downloaded_images
+#    print $already_downloaded_images
 
     let photos_to_download = (
         $all_pod | where {|it|
@@ -74,7 +76,7 @@ export def main [] {
     $photos_to_download | par-each {|photo|
          log info $"downloading ($photo.url)"
          print $"downloading ($photo.filename)"
-         http get $photo.url | save -f --progress $"($photo.filename)"
+         try  { http get $photo.url | save -f --progress $"($photo.filename)" } catch { print $photo.url }
     }
 
     ()
